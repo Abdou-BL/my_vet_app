@@ -1,0 +1,63 @@
+/* Existing styles */
+.mark-all-read,
+.clear-all {
+    background: #2E7D32;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    margin-top: -40px; /* Move buttons up 40px */
+}
+
+.mark-all-read {
+    margin-right: 60px;
+    float: left;
+}
+
+.clear-all {
+    margin-left: 150px; /* Add space between buttons */
+    float: left;
+}
+
+.mark-all-read:hover,
+.clear-all:hover {
+    background: #1b5e20;
+}
+
+.notifications-list {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(80vh - 140px); /* Adjusted to account for footer */
+}
+
+/* New category navigation button styles */
+.category-prev,
+.category-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(46,125,50,0.8);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 20px;
+    border-radius: 50%;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.category-prev:hover,
+.category-next:hover {
+    background: rgba(46,125,50,1);
+}
+
+.category-prev { left: 10px; }
+.category-next { right: 10px; }

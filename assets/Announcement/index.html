@@ -1,0 +1,129 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veterinary & Pet Care Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="notification-styles.css">
+    <link rel="stylesheet" href="hero-styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Hero Section Title -->
+        <div class="hero-title">Latest and Popular Announcements</div>
+
+        <!-- Hero Slider -->
+        <div class="hero-slider">
+            <div class="slider-container">
+                <!-- Slides will be populated by JS -->
+            </div>
+            <button class="hero-prev">&lt;</button>
+            <button class="hero-next">&gt;</button>
+        </div>
+
+        <!-- Categories Carousel -->
+        <div class="categories">
+            <h2>Categories</h2>
+            <div class="categories-slider">
+                <button class="category-prev">&lt;</button>
+                <button class="category-next">&gt;</button>
+                <div class="categories-container">
+                    <!-- Categories will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Button and Menu -->
+    <button class="settings-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+        </svg>
+    </button>
+    
+    <div class="settings-menu">
+        <h3>Menu</h3>
+        <ul class="menu-list">
+            <li class="menu-item" data-action="my-announcements">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                    <path d="M14 17H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                </svg>
+                My Announcements
+            </li>
+            <li class="menu-item" data-action="history">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                </svg>
+                History
+            </li>
+            <li class="menu-item" data-action="notifications">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+                </svg>
+                Notifications
+                <span class="notification-badge">0</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab">+</div>
+
+    <!-- AI Navigation Button - New Addition -->
+    <button id="ai-nav-button" class="fab" style="right: 20px; bottom: 160px; background-color: #4CAF50;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-4v2h4v2h-4v2h4v2H9V7h6v2z"/>
+        </svg>
+    </button>
+
+    <!-- Share Modal -->
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="drag-handle"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Share Announcement</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form class="share-form">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Image</label>
+                        <div class="image-upload">
+                            <input type="file" id="image" accept="image/*" hidden>
+                            <p>Click to upload or drag and drop</p>
+                            <img class="image-preview">
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">Share</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "config": "./config.js"
+        }
+    }
+    </script>
+    
+    <script type="module" src="main.js"></script>
+    
+    <!-- AI Navigation Handler - New Addition -->
+    <script>
+        document.getElementById('ai-nav-button').addEventListener('click', function() {
+            window.parent.postMessage('NAVIGATE_TO_AI_SCREEN', '*');
+        });
+    </script>
+</body>
+</html>
