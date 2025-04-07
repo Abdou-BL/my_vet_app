@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:async';
+import '../widgets/nav_bar.dart';
 
 // استيراد الشاشات
 import 'SU/home_screen.dart';
-
 import 'SU/rdv_screen.dart';
 import 'SU/user_screen.dart';
 
@@ -15,10 +14,9 @@ class DoctorHomeScreen extends StatefulWidget {
   _DoctorHomeScreenState createState() => _DoctorHomeScreenState();
 }
 
-class _DoctorHomeScreenState extends State<DoctorHomeScreen> with TickerProviderStateMixin {
+class _DoctorHomeScreenState extends State<DoctorHomeScreen>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
-  bool _isBarVisible = true;
-  Timer? _hideTimer;
   bool _isTransitioning = false;
   late PageController _pageController;
 
@@ -38,13 +36,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> with TickerProvider
   @override
   void initState() {
     super.initState();
-    _isBarVisible = true;
     _pageController = PageController(
       initialPage: _selectedIndex,
       viewportFraction: 1.0,
       keepPage: true,
     );
-    _startHideTimer();
     _precacheIcons();
     _precachePages();
   }
@@ -60,7 +56,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> with TickerProvider
   }
 
   void _precachePages() {
-    // Precaching all pages
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (var i = 0; i < _screens.length; i++) {
         _pageController.position.correctPixels(i.toDouble());
@@ -75,7 +70,6 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> with TickerProvider
     setState(() {
       _isTransitioning = true;
       _selectedIndex = index;
-      if (!_isPhone(context)) _isBarVisible = true;
     });
 
     _pageController.animateToPage(
@@ -87,200 +81,48 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> with TickerProvider
         setState(() => _isTransitioning = false);
       }
     });
-
-    if (!_isPhone(context)) {
-      _hideTimer?.cancel();
-      _startHideTimer();
-    }
-  }
-
-  void _startHideTimer() {
-    _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted && !_isTransitioning) {
-        setState(() => _isBarVisible = false);
-      }
-    });
-  }
-
-  void _resetHideTimer() {
-    if (mounted) {
-      setState(() => _isBarVisible = true);
-    }
-    _startHideTimer();
   }
 
   @override
   void dispose() {
-    _hideTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
 
-  bool _isPhone(BuildContext context) {
-    return MediaQuery.of(context).size.width < 600;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bool isPhone = _isPhone(context);
-    final double navBarWidth = isPhone ? 0 : MediaQuery.of(context).size.width * 0.8;
-    final double itemWidth = navBarWidth / _items.length;
+    final double navBarWidth = MediaQuery.of(context).size.width;
     final double navBarHeight = 70;
-    final double iconSize = 22;
-    final double labelFontSize = 11;
+    final bool isPhone = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Main content with swipe support
-          PageView(
-            controller: _pageController,
-            physics: isPhone 
-                ? const ClampingScrollPhysics()
-                : const NeverScrollableScrollPhysics(),
-            onPageChanged: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            children: _screens.map((screen) {
-              return KeepAliveWrapper(
-                child: screen,
-              );
-            }).toList(),
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: isPhone ? navBarHeight -15 : navBarHeight,
+            ),
+            child: PageView(
+              controller: _pageController,
+              physics: const ClampingScrollPhysics(),
+              onPageChanged: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              children: _screens.map((screen) {
+                return KeepAliveWrapper(
+                  child: screen,
+                );
+              }).toList(),
+            ),
           ),
-
-          // Navigation Bar (only for non-phone devices)
-          if (!isPhone)
-            Positioned(
-              bottom: 25,
-              left: (MediaQuery.of(context).size.width - navBarWidth) / 2,
-              child: MouseRegion(
-                onEnter: (_) => _resetHideTimer(),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 500),
-                  height: navBarHeight,
-                  transform: Matrix4.translationValues(
-                      0, _isBarVisible ? 0 : 100, 0),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 14, 194, 35),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      // Animated background for selected item
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 800),
-                        curve: Curves.elasticOut,
-                        left: (_selectedIndex * itemWidth) + 10,
-                        child: Container(
-                          width: itemWidth - 20,
-                          height: 45,
-                          margin: const EdgeInsets.symmetric(vertical: 11),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),)
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Icons and labels
-                      Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: List.generate(_items.length, (index) {
-                            return InkWell(
-                              onTap: () => _onItemTapped(index),
-                              borderRadius: BorderRadius.circular(20),
-                              splashColor: Colors.white.withOpacity(0.2),
-                              child: SizedBox(
-                                width: itemWidth,
-                                height: navBarHeight,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      _items[index].icon,
-                                      width: iconSize,
-                                      height: iconSize,
-                                      colorFilter: ColorFilter.mode(
-                                        _selectedIndex == index
-                                            ? const Color.fromARGB(
-                                                255, 13, 173, 40)
-                                            : Colors.white.withOpacity(0.8),
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    AnimatedOpacity(
-                                      duration:
-                                          const Duration(milliseconds: 400),
-                                      opacity:
-                                          _selectedIndex == index ? 1.0 : 0.0,
-                                      child: AnimatedSlide(
-                                        duration:
-                                            const Duration(milliseconds: 400),
-                                        offset: _selectedIndex == index
-                                            ? Offset.zero
-                                            : const Offset(1, 0),
-                                        child: Text(
-                                          _items[index].label,
-                                          style: TextStyle(
-                                            color: _selectedIndex == index
-                                                ? const Color.fromARGB(
-                                                    255, 13, 173, 40)
-                                                : Colors.white
-                                                    .withOpacity(0.8),
-                                            fontSize: labelFontSize,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-          // Swipe detector area for non-phone to show nav bar
-          if (!isPhone && !_isBarVisible)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 100,
-              child: GestureDetector(
-                onVerticalDragUpdate: (details) {
-                  if (details.primaryDelta! < -5) _resetHideTimer();
-                },
-                child: MouseRegion(
-                  onHover: (_) => _resetHideTimer(),
-                  child: Container(color: Colors.transparent),
-                ),
-              ),
-            ),
+          CustomNavBar(
+            selectedIndex: _selectedIndex,
+            items: _items,
+            onItemTapped: _onItemTapped,
+            navBarWidth: navBarWidth,
+            navBarHeight: navBarHeight,
+          ),
         ],
       ),
     );
@@ -306,11 +148,4 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
 
   @override
   bool get wantKeepAlive => true;
-}
-
-class NavItem {
-  final String icon;
-  final String label;
-
-  NavItem({required this.icon, required this.label});
 }
