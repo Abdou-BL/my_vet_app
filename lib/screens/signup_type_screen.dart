@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'user_signup_screen.dart'; // ✅ استيراد شاشة التسجيل للمستخدم
-import 'doctor_signup_screen.dart'; // ✅ استيراد شاشة التسجيل للطبيب
-import 'login_screen.dart'; // ✅ استيراد شاشة تسجيل الدخول
+import '../widgets/colors.dart'; // Import your color file
+import 'user_signup_screen.dart'; // Import the user sign-up screen
+import 'doctor_signup_screen.dart'; // Import the doctor sign-up screen
+import 'login_screen.dart'; // Import the login screen
 
 class SignupTypeScreen extends StatefulWidget {
   const SignupTypeScreen({super.key});
@@ -21,12 +22,12 @@ class _SignupTypeScreenState extends State<SignupTypeScreen> {
     double iconSize = screenWidth > 1200 ? 100 : 70;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFDBFFE6),
+      backgroundColor: AppColors.primaryLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF2E7D32)),
+          icon: Icon(Icons.arrow_back, color: AppColors.primaryColor),
           onPressed: () {
             Navigator.pushReplacement(
               context,
@@ -54,10 +55,10 @@ class _SignupTypeScreenState extends State<SignupTypeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 "Select Account Type",
                 style: TextStyle(
-                  color: Color(0xFF2E7D32),
+                  color: AppColors.primaryColor,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -74,7 +75,7 @@ class _SignupTypeScreenState extends State<SignupTypeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => UserSignupScreen(),
+                            builder: (context) => const UserSignupScreen(),
                           ),
                         );
                       },
@@ -96,7 +97,7 @@ class _SignupTypeScreenState extends State<SignupTypeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => DoctorSignupScreen(),
+                            builder: (context) => const DoctorSignupScreen(),
                           ),
                         );
                       },
@@ -153,10 +154,10 @@ class _SignupTypeScreenState extends State<SignupTypeScreen> {
               const SizedBox(height: 10),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
+                  color: AppColors.primaryColor,
                 ),
               ),
             ],

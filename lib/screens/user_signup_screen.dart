@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/animated_widgets.dart';
-import 'user_home_screen.dart'; // استيراد شاشة UserHomeScreen
+import 'user_home_screen.dart'; // Import the UserHomeScreen
+import '../widgets/colors.dart';    // Import your custom colors
 
 class UserSignupScreen extends StatefulWidget {
   const UserSignupScreen({super.key});
@@ -22,10 +23,10 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
     if (_acceptTerms) {
       print("Signing Up...");
 
-      // الانتقال إلى الشاشة الرئيسية بعد التسجيل
+      // Navigate to the home screen after successful signup
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) =>  UserHomeScreen()),
+        MaterialPageRoute(builder: (context) => const UserHomeScreen()),
       );
     }
   }
@@ -36,7 +37,7 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
     double containerWidth = screenWidth > 1200 ? 500 : screenWidth * 0.9;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFDBFFE6),
+      backgroundColor: AppColors.primaryLight,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -60,11 +61,11 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     "User Signup",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color(0xFF2E7D32),
+                      color: AppColors.primaryColor,
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
@@ -74,9 +75,17 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                   const SizedBox(height: 15),
                   AnimatedTextField(controller: emailController, label: "Email"),
                   const SizedBox(height: 15),
-                  AnimatedTextField(controller: passwordController, label: "Password", isPassword: true),
+                  AnimatedTextField(
+                    controller: passwordController,
+                    label: "Password",
+                    isPassword: true,
+                  ),
                   const SizedBox(height: 15),
-                  AnimatedTextField(controller: confirmPasswordController, label: "Confirm Password", isPassword: true),
+                  AnimatedTextField(
+                    controller: confirmPasswordController,
+                    label: "Confirm Password",
+                    isPassword: true,
+                  ),
                   const SizedBox(height: 20),
                   Row(
                     children: [
@@ -87,7 +96,7 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                             _acceptTerms = value!;
                           });
                         },
-                        activeColor: const Color(0xFF2E7D32),
+                        activeColor: AppColors.primaryColor,
                       ),
                       Expanded(
                         child: MouseRegion(
@@ -102,14 +111,19 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                             child: RichText(
                               text: TextSpan(
                                 text: "I accept the ",
-                                style: const TextStyle(color: Colors.black, fontSize: 14),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
                                 children: [
                                   TextSpan(
                                     text: "Terms & Conditions",
                                     style: TextStyle(
-                                      color: const Color(0xFF2E7D32),
+                                      color: AppColors.primaryColor,
                                       fontWeight: FontWeight.bold,
-                                      decoration: _isHovering ? TextDecoration.underline : TextDecoration.none,
+                                      decoration: _isHovering
+                                          ? TextDecoration.underline
+                                          : TextDecoration.none,
                                     ),
                                   ),
                                 ],
@@ -128,9 +142,12 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                   const SizedBox(height: 15),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
+                    child: Text(
                       "Back to Selection",
-                      style: TextStyle(color: Color(0xFF2E7D32), fontSize: 16),
+                      style: TextStyle(
+                        color: AppColors.primaryColor,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ],

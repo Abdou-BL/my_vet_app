@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
-
+import '../widgets/colors.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(seconds: 10),
       vsync: this,
     );
 
@@ -65,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     logoSize = logoSize.clamp(300.0, 400.0); // الحد الأدنى 180px والحد الأقصى 400px
 
     return Scaffold(
-      backgroundColor: const Color(0xFFDBFFE6),
+      backgroundColor: AppColors.primaryLight,
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,

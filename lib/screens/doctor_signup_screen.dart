@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../widgets/animated_widgets.dart';
-import 'doctor_home_screen.dart'; // استيراد شاشة DoctorHomeScreen
+import 'doctor_home_screen.dart';
+import '../widgets/colors.dart'; // Make sure AppColors is imported
 
 class DoctorSignupScreen extends StatefulWidget {
   const DoctorSignupScreen({super.key});
@@ -22,7 +23,6 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
 
   void _onSignupPressed() {
     if (_acceptTerms) {
-      // الانتقال إلى DoctorHomeScreen بعد التسجيل
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => DoctorHomeScreen()),
@@ -51,10 +51,10 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
         ? 450
         : screenWidth > 600
             ? screenWidth * 0.7
-            : screenWidth * 0.9; // Adjust for mobile screens
+            : screenWidth * 0.9;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFDBFFE6),
+      backgroundColor: AppColors.primaryLight,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -87,7 +87,7 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
                             "Doctor Signup",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Color(0xFF2E7D32),
+                              color: AppColors.primaryColor,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),
@@ -106,7 +106,11 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
 
                           const Text(
                             "Certification Verification",
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2E7D32)),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryColor,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           InkWell(
@@ -115,7 +119,7 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                               decoration: BoxDecoration(
-                                border: Border.all(color: const Color(0xFF81C784), width: 2),
+                                border: Border.all(color: AppColors.termineeColor, width: 2),
                                 borderRadius: BorderRadius.circular(12),
                                 color: Colors.white,
                               ),
@@ -124,19 +128,26 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF2E7D32),
+                                      color: AppColors.primaryColor,
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: const Text(
                                       "Choose File",
-                                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
                                       selectedFileName ?? "No file chosen (PDF/IMAGE)",
-                                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -155,7 +166,7 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
                                     _acceptTerms = value!;
                                   });
                                 },
-                                activeColor: const Color(0xFF2E7D32),
+                                activeColor: AppColors.primaryColor,
                               ),
                               Expanded(
                                 child: MouseRegion(
@@ -175,7 +186,7 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
                                           TextSpan(
                                             text: "Terms & Conditions",
                                             style: TextStyle(
-                                              color: const Color(0xFF2E7D32),
+                                              color: AppColors.primaryColor,
                                               fontWeight: FontWeight.bold,
                                               decoration: _isHovering ? TextDecoration.underline : TextDecoration.none,
                                             ),
@@ -199,7 +210,7 @@ class _DoctorSignupScreenState extends State<DoctorSignupScreen> {
                             onPressed: () => Navigator.pop(context),
                             child: const Text(
                               "Back to Selection",
-                              style: TextStyle(color: Color(0xFF2E7D32), fontSize: 16),
+                              style: TextStyle(color: AppColors.primaryColor, fontSize: 16),
                             ),
                           ),
                         ],

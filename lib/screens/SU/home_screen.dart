@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'publication_card.dart';
 
 class AnnouncementScreen extends StatefulWidget {
-  const AnnouncementScreen({super.key});
+  final bool isDoctor;
+
+  const AnnouncementScreen({super.key, required this.isDoctor});
 
   @override
   State<AnnouncementScreen> createState() => _AnnouncementScreenState();
 }
 
-class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProviderStateMixin {
+class _AnnouncementScreenState extends State<AnnouncementScreen>
+    with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final GlobalKey _menuKey = GlobalKey();
@@ -65,14 +68,16 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
     super.dispose();
   }
 
-  // Updated function to open the menu on the right side.
+  // دالة عرض القائمة (Menu)
   void _openMenu(BuildContext context) {
-    final RenderBox button = _menuKey.currentContext!.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    final Offset buttonPosition = button.localToGlobal(Offset.zero, ancestor: overlay);
+    final RenderBox button =
+        _menuKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final Offset buttonPosition =
+        button.localToGlobal(Offset.zero, ancestor: overlay);
     final double overlayWidth = overlay.size.width;
-    // Calculate left so that the menu appears anchored to the right.
-    final double left = overlayWidth - button.size.width - 16.0; // 16 px margin from right edge
+    final double left = overlayWidth - button.size.width - 16.0; // 16px هامش
 
     showMenu(
       context: context,
@@ -97,30 +102,38 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final bool isPC = screenWidth > 600;
+    final double sliderHeight = isPC ? 320.0 : 220.0;
+    final double navButtonTop = isPC ? 120.0 : 80.0;
+
     return Scaffold(
       backgroundColor: const Color(0xFFE0F2F1),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Add your action for "+" button
-        },
-        backgroundColor: primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      // عرض زر الإضافة فقط إذا كان المستخدم طبيب
+      floatingActionButton: widget.isDoctor
+          ? FloatingActionButton(
+              onPressed: () {
+                // TODO: تنفيذ الإجراء عند الضغط على زر "+"
+              },
+              backgroundColor: primaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.only(bottom: 80),
           children: [
-            // ─── Title Bar (VETONCALL) with Menu Button ──────────────────────────
+            // ─── شريط العنوان مع زر القائمة ─────────────────────────────
             Container(
               margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: primaryColor, width: 2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
-                key: _menuKey, // Attach the key here for menu positioning.
+                key: _menuKey, // مفتاح لموضع القائمة.
                 children: [
                   Expanded(
                     child: Text(
@@ -128,7 +141,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: primaryColor,
-                        fontSize: screenWidth > 600 ? 32 : 22,
+                        fontSize: isPC ? 32 : 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -144,7 +157,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 4,
-                            offset: Offset(2, 2),
+                            offset: const Offset(2, 2),
                           )
                         ],
                       ),
@@ -154,9 +167,10 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                 ],
               ),
             ),
-            // ─── Image Box with Welcome Text and Animated Thanks Message ─────────────
+            // ─── صندوق الصورة مع نص الترحيب ─────────────────────────────
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -185,14 +199,15 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                     ),
                   if (_showThanks)
                     Positioned(
-                      top: screenWidth > 600 ? 50 : 140,
-                      left: screenWidth > 600 ? 500 : null,
-                      right: screenWidth > 600 ? null : 0,
-                      child: screenWidth > 600
+                      top: isPC ? 50 : 132,
+                      left: isPC ? 500 : null,
+                      right: isPC ? null : 0,
+                      child: isPC
                           ? SizedBox(
                               width: 700,
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                 children: [
                                   Transform.translate(
                                     offset: const Offset(-20, 0),
@@ -208,7 +223,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                                     child: WelcomeTextAnimator(
                                       text: "Your pet's health",
                                       fontSize: 40,
-                                      delay: Duration(milliseconds: 2000),
+                                      delay:
+                                          Duration(milliseconds: 2000),
                                     ),
                                   ),
                                   const SizedBox(height: 5),
@@ -217,7 +233,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                                     child: WelcomeTextAnimator(
                                       text: "is our propriety",
                                       fontSize: 40,
-                                      delay: Duration(milliseconds: 4000),
+                                      delay:
+                                          Duration(milliseconds: 4000),
                                     ),
                                   ),
                                 ],
@@ -226,7 +243,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                           : SizedBox(
                               width: 160,
                               child: WelcomeTextAnimator(
-                                text: "Thanks for joining! Your pet’s health is our top priority",
+                                text:
+                                    "Thanks for joining! Your pet’s health is our top priority",
                                 fontSize: 14,
                                 textAlign: TextAlign.center,
                               ),
@@ -235,10 +253,10 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                 ],
               ),
             ),
-            // ─── Slider ──────────────────────────────────────────────────────────────
+            // ─── Slider ────────────────────────────────────────────────────
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              height: 220,
+              height: sliderHeight,
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: primaryColor, width: 2),
@@ -306,9 +324,10 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                       );
                     },
                   ),
+                  // زر التنقل (السهم لليسار)
                   Positioned(
                     left: 8,
-                    top: 80,
+                    top: navButtonTop,
                     child: _navButton(Icons.chevron_left, () {
                       if (_currentPage > 0) {
                         _pageController.previousPage(
@@ -318,9 +337,10 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                       }
                     }),
                   ),
+                  // زر التنقل (السهم لليمين)
                   Positioned(
                     right: 8,
-                    top: 80,
+                    top: navButtonTop,
                     child: _navButton(Icons.chevron_right, () {
                       if (_currentPage < 4) {
                         _pageController.nextPage(
@@ -333,21 +353,24 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
                 ],
               ),
             ),
-            // ─── Publication Cards ──────────────────────────────────────────────────
+            // ─── بطاقات المنشورات ──────────────────────────────────────────
             PublicationCard(
               username: "Dr. Emily",
               content: "Don’t forget to vaccinate your pets this season!",
               imageUrl: 'assets/images/welcome.png',
+              isCreator: true,
             ),
             PublicationCard(
               username: "Vet Clinic",
               content: "New pet grooming services now available 🐾",
               imageUrl: 'assets/images/person.png',
+              isCreator: false,
             ),
             PublicationCard(
               username: "Pet Rescue Org",
               content: "Adopt, don’t shop! 🐶❤️",
               imageUrl: 'assets/images/doctor.png',
+              isCreator: false,
             ),
           ],
         ),
@@ -355,6 +378,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
     );
   }
 
+  // زر التنقل
   Widget _navButton(IconData icon, VoidCallback onPressed) {
     return Material(
       color: primaryColor.withOpacity(0.9),
@@ -393,7 +417,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> with TickerProv
   }
 }
 
-// ─── Reusable Welcome Text Animation Widget ───────────────────────────────
+// ─── Widget نص الترحيب المتحرك ──────────────────────────────────────
 class WelcomeTextAnimator extends StatefulWidget {
   final String text;
   final double fontSize;
@@ -412,7 +436,8 @@ class WelcomeTextAnimator extends StatefulWidget {
   State<WelcomeTextAnimator> createState() => _WelcomeTextAnimatorState();
 }
 
-class _WelcomeTextAnimatorState extends State<WelcomeTextAnimator> with SingleTickerProviderStateMixin {
+class _WelcomeTextAnimatorState extends State<WelcomeTextAnimator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<int> _charCount;
 

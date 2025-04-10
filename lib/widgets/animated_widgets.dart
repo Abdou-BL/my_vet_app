@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'colors.dart'; // Import your color file
 
 // Widget مخصص لحقل إدخال مع تأثيرات
 class AnimatedTextField extends StatelessWidget {
@@ -74,7 +75,7 @@ class AnimatedButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2E7D32),
+            backgroundColor: AppColors.primaryColor,
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

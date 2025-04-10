@@ -11,7 +11,6 @@ class AIScreen extends StatefulWidget {
 class _AIScreenState extends State<AIScreen> with AutomaticKeepAliveClientMixin<AIScreen> {
   late InAppWebViewController _webViewController;
   bool _isError = false;
-  bool _isLoading = true;
 
   @override
   bool get wantKeepAlive => true;
@@ -36,33 +35,29 @@ class _AIScreenState extends State<AIScreen> with AutomaticKeepAliveClientMixin<
                 ),
               ),
               initialUrlRequest: URLRequest(
-                url: WebUri('https://test-ai-1--vetvet.on.websim.ai'),
+                url: WebUri('vet-on-call-ai.on.websim.ai'),
               ),
               onWebViewCreated: (controller) {
                 _webViewController = controller;
               },
               onLoadStart: (controller, url) {
                 setState(() {
-                  _isLoading = true;
                   _isError = false;
                 });
               },
               onLoadStop: (controller, url) async {
                 setState(() {
-                  _isLoading = false;
                 });
                 await _hideLogo();
               },
               onLoadError: (controller, url, code, message) {
                 setState(() {
                   _isError = true;
-                  _isLoading = false;
                 });
               },
               onReceivedError: (controller, request, error) {
                 setState(() {
                   _isError = true;
-                  _isLoading = false;
                 });
               },
             ),
@@ -87,12 +82,6 @@ class _AIScreenState extends State<AIScreen> with AutomaticKeepAliveClientMixin<
                 ],
               ),
             ),
-          
-          // Loading Indicator
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
         ],
       ),
     );
@@ -101,7 +90,6 @@ class _AIScreenState extends State<AIScreen> with AutomaticKeepAliveClientMixin<
   Future<void> _refreshPage() async {
     setState(() {
       _isError = false;
-      _isLoading = true;
     });
     await _webViewController.reload();
   }

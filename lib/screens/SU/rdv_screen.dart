@@ -1,18 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'details_modal.dart';
-
-void main() {
-  runApp(MaterialApp(
-    home: RDVScreen(),
-    theme: ThemeData(
-      dialogTheme: DialogTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-    ),
-  ));
-}
+import '../../widgets/colors.dart';
 
 class RDVScreen extends StatefulWidget {
   @override
@@ -25,183 +14,189 @@ class _RDVScreenState extends State<RDVScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _getWeekStart(selectedDate);
-    // Check if device is phone (e.g. width less than 600)
     bool isPhone = MediaQuery.of(context).size.width < 600;
 
     if (isPhone) {
-      // Phone layout: planning week takes full screen and mini calendar overlays it (with masking)
+      // Phone layout: Wrap in SafeArea so the UI does not overlap with system elements.
       return Scaffold(
-        backgroundColor: Colors.green[50],
-        body: Stack(
-          children: [
-            // Full screen planning week box
-            Positioned.fill(
-              child: _PlanningWeekBox(
-                selectedDate: selectedDate,
-                key: ValueKey<DateTime>(selectedDate),
-              ),
-            ),
-            // Overlay the mini calendar when visible (it uses almost full width)
-            if (isCalendarVisible)
+        backgroundColor: AppColors.primaryLight,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              // Full screen planning day box
               Positioned.fill(
-                child: Container(
-                  color: Colors.white.withOpacity(0.95), // Masking effect
-                  padding: EdgeInsets.all(10),
-                  child: MiniCalendarBox(
-                    onDateSelected: (newDate) {
-                      setState(() {
-                        selectedDate = newDate;
-                        // Optionally hide the mini calendar after date selection
-                        isCalendarVisible = false;
-                      });
-                    },
-                  ),
+                child: _PlanningDayBox(
+                  selectedDate: selectedDate,
+                  key: ValueKey<DateTime>(selectedDate),
+                  onDateChanged: (newDate) {
+                    setState(() {
+                      selectedDate = newDate;
+                    });
+                  },
                 ),
               ),
-            // Toggle button (positioned at top right) - ONLY CHANGE IS HERE
-            Positioned(
-              top: isPhone ? 30 : 10, // Changed from 10 to 30 for phones
-              right: 10,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isCalendarVisible = !isCalendarVisible;
-                  });
-                },
-                child: Container(
-                  width: isPhone ? 40:30,
-                  height: isPhone ? 40:30,
-                  
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),)
-                    ],
+              // Overlay the mini calendar when visible
+              if (isCalendarVisible)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.white.withOpacity(0.95),
+                    padding: EdgeInsets.all(10),
+                    child: MiniCalendarBox(
+                      onDateSelected: (newDate) {
+                        setState(() {
+                          selectedDate = newDate;
+                          // Optionally hide the mini calendar after date selection
+                          isCalendarVisible = false;
+                        });
+                      },
+                    ),
                   ),
-                  alignment: Alignment.center,
-                  child: AnimatedSwitcher(
-                    duration: Duration(milliseconds: 300),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      return ScaleTransition(scale: animation, child: child);
-                    },
-                    child: Icon(
-                      isCalendarVisible ? Icons.chevron_left : Icons.chevron_right,
-                      key: ValueKey<bool>(isCalendarVisible),
-                      color: Colors.white,
-                      size: isPhone ? 24 : 20,
+                ),
+              // Toggle button (positioned at top right)
+              Positioned(
+                top: 3,
+                right: 5,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isCalendarVisible = !isCalendarVisible;
+                    });
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: AnimatedSwitcher(
+                      duration: Duration(milliseconds: 300),
+                      transitionBuilder: (Widget child, Animation<double> animation) {
+                        return ScaleTransition(scale: animation, child: child);
+                      },
+                      child: Icon(
+                        isCalendarVisible ? Icons.chevron_left : Icons.chevron_right,
+                        key: ValueKey<bool>(isCalendarVisible),
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     } else {
-      // PC layout (unchanged)
+      // PC layout: wrap the main content in SafeArea
       return Scaffold(
-        backgroundColor: Colors.green[50],
-        body: Stack(
-          children: [
-            Row(
-              children: [
-                // Mini Calendar with smooth animation
-                AnimatedSize(
-                  duration: Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    width: isCalendarVisible ? 300 : 0,
-                    color: Colors.green[100],
-                    padding: EdgeInsets.all(10),
-                    child: isCalendarVisible 
-                      ? MiniCalendarBox(
-                          onDateSelected: (newDate) {
-                            setState(() {
-                              selectedDate = newDate;
-                            });
-                          },
-                        )
-                      : null,
-                  ),
-                ),
-
-                // Main content area
-                Expanded(
-                  child: AnimatedPadding(
+        backgroundColor: AppColors.primaryLight,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Row(
+                children: [
+                  // Mini Calendar with smooth animation
+                  AnimatedSize(
                     duration: Duration(milliseconds: 500),
                     curve: Curves.easeInOut,
-                    padding: EdgeInsets.only(left: isCalendarVisible ? 0 : 0),
-                    child: Column(
-                      children: [
-                        _PlanningWeekBox(
-                          selectedDate: selectedDate,
-                          key: ValueKey<DateTime>(selectedDate),
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: isCalendarVisible ? 300 : 0,
+                      color: AppColors.primaryLight,
+                      padding: EdgeInsets.all(10),
+                      child: isCalendarVisible
+                          ? MiniCalendarBox(
+                              onDateSelected: (newDate) {
+                                setState(() {
+                                  selectedDate = newDate;
+                                });
+                              },
+                            )
+                          : null,
+                    ),
+                  ),
+                  // Main content area - Planning Day Box
+                  Expanded(
+                    child: AnimatedPadding(
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                      padding: EdgeInsets.only(left: 0),
+                      child: Column(
+                        children: [
+                          _PlanningDayBox(
+                            selectedDate: selectedDate,
+                            key: ValueKey<DateTime>(selectedDate),
+                            onDateChanged: (newDate) {
+                              setState(() {
+                                selectedDate = newDate;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              // Toggle button for mini calendar (PC version)
+              AnimatedPositioned(
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+                top: 10,
+                left: isCalendarVisible ? 259 : 45,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isCalendarVisible = !isCalendarVisible;
+                    });
+                  },
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Toggle button (unchanged for PC)
-            AnimatedPositioned(
-              duration: Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
-              top: 10,
-              left: isCalendarVisible ? 259 : 45,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isCalendarVisible = !isCalendarVisible;
-                  });
-                },
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+                    alignment: Alignment.center,
+                    child: AnimatedSwitcher(
+                      duration: Duration(milliseconds: 300),
+                      transitionBuilder: (Widget child, Animation<double> animation) {
+                        return ScaleTransition(scale: animation, child: child);
+                      },
+                      child: Icon(
+                        isCalendarVisible ? Icons.chevron_left : Icons.chevron_right,
+                        key: ValueKey<bool>(isCalendarVisible),
+                        color: Colors.white,
                       ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: AnimatedSwitcher(
-                    duration: Duration(milliseconds: 300),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      return ScaleTransition(scale: animation, child: child);
-                    },
-                    child: Icon(
-                      isCalendarVisible ? Icons.chevron_left : Icons.chevron_right,
-                      key: ValueKey<bool>(isCalendarVisible),
-                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
   }
-
-  DateTime _getWeekStart(DateTime date) {
-    int dayOfWeek = date.weekday;
-    return date.subtract(Duration(days: dayOfWeek - 1));
-  }
 }
+
 class MiniCalendarBox extends StatefulWidget {
   final Function(DateTime) onDateSelected;
 
@@ -255,7 +250,7 @@ class _MiniCalendarBoxState extends State<MiniCalendarBox>
     bool isPhone = MediaQuery.of(context).size.width < 600;
     double calendarWidth = isPhone ? MediaQuery.of(context).size.width * 0.9 : 300;
 
-    return Center( // Wrapped with Center widget for phone screens
+    return Center(
       child: Padding(
         padding: EdgeInsets.only(top: isPhone ? 20.0 : 0.0),
         child: Stack(
@@ -297,14 +292,15 @@ class _MiniCalendarBoxState extends State<MiniCalendarBox>
             color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 2,
-            offset: Offset(0, 4),)
+            offset: Offset(0, 4),
+          )
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.green),
+            icon: Icon(Icons.arrow_back, color: AppColors.primaryColor),
             onPressed: () {
               setState(() {
                 currentMonth = DateTime(currentMonth.year, currentMonth.month - 1, 1);
@@ -316,11 +312,11 @@ class _MiniCalendarBoxState extends State<MiniCalendarBox>
               DateFormat.yMMMM('fr_FR').format(currentMonth),
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                  fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryColor),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.arrow_forward, color: Colors.green),
+            icon: Icon(Icons.arrow_forward, color: AppColors.primaryColor),
             onPressed: () {
               setState(() {
                 currentMonth = DateTime(currentMonth.year, currentMonth.month + 1, 1);
@@ -363,13 +359,13 @@ class _MiniCalendarBoxState extends State<MiniCalendarBox>
                 child: Text(
                   day,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryColor),
                 ),
               );
             }).toList(),
           ),
           Divider(
-            color: Colors.green,
+            color: AppColors.primaryColor,
             thickness: 1,
             height: 15,
           ),
@@ -386,13 +382,11 @@ class _MiniCalendarBoxState extends State<MiniCalendarBox>
               if (index < firstWeekday) {
                 return Container();
               }
-
               int day = index - firstWeekday + 1;
               DateTime thisDay = DateTime(currentMonth.year, currentMonth.month, day);
               bool isSelected = selectedDate.year == thisDay.year &&
                   selectedDate.month == thisDay.month &&
                   selectedDate.day == thisDay.day;
-
               bool isToday = today.year == thisDay.year &&
                   today.month == thisDay.month &&
                   today.day == thisDay.day;
@@ -408,15 +402,15 @@ class _MiniCalendarBoxState extends State<MiniCalendarBox>
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.green
+                        ? AppColors.primaryColor
                         : (isToday ? Colors.blueAccent : Colors.transparent),
                     borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Colors.green.withOpacity(0.5)),
+                    border: Border.all(color: AppColors.primaryColor.withOpacity(0.5)),
                   ),
                   child: Text(
                     "$day",
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.green[900],
+                      color: isSelected ? Colors.white : AppColors.primaryColor,
                     ),
                   ),
                 ),
@@ -433,6 +427,7 @@ class _MiniAppointmentBox extends StatefulWidget {
   final String clientName;
   final String animal;
   final double hour;
+  // Default appointment color
   final Color color;
   final VoidCallback onTap;
 
@@ -440,7 +435,7 @@ class _MiniAppointmentBox extends StatefulWidget {
     required this.clientName,
     required this.animal,
     required this.hour,
-    this.color = const Color(0xFF2196F3),
+    this.color = AppColors.miniAppointmentColor,
     required this.onTap,
   });
 
@@ -448,7 +443,7 @@ class _MiniAppointmentBox extends StatefulWidget {
   __MiniAppointmentBoxState createState() => __MiniAppointmentBoxState();
 }
 
-class __MiniAppointmentBoxState extends State<_MiniAppointmentBox> 
+class __MiniAppointmentBoxState extends State<_MiniAppointmentBox>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -461,14 +456,14 @@ class __MiniAppointmentBoxState extends State<_MiniAppointmentBox>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    
+
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeOut,
       ),
     );
-    
+
     _elevationAnimation = Tween<double>(begin: 2.0, end: 6.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -487,9 +482,9 @@ class __MiniAppointmentBoxState extends State<_MiniAppointmentBox>
   Widget build(BuildContext context) {
     final bool isPhone = MediaQuery.of(context).size.width < 600;
     double positionInHour = widget.hour % 1;
-    
+
     return Positioned(
-      top: positionInHour * (isPhone ? 50 : 60), // Adjusted for phone
+      top: positionInHour * (isPhone ? 50 : 60),
       left: 0,
       right: 0,
       child: MouseRegion(
@@ -513,7 +508,7 @@ class __MiniAppointmentBoxState extends State<_MiniAppointmentBox>
                     color: widget.color,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: widget.color.withOpacity(0.8), 
+                      color: widget.color.withOpacity(0.8),
                       width: 1.5,
                     ),
                     boxShadow: [
@@ -570,376 +565,381 @@ class __MiniAppointmentBoxState extends State<_MiniAppointmentBox>
     );
   }
 }
-class _PlanningWeekBox extends StatefulWidget {
-  final DateTime selectedDate;
 
-  const _PlanningWeekBox({
-    required this.selectedDate, 
+class _PlanningDayBox extends StatefulWidget {
+  final DateTime selectedDate;
+  final ValueChanged<DateTime> onDateChanged;
+
+  const _PlanningDayBox({
+    required this.selectedDate,
+    required this.onDateChanged,
     Key? key,
   }) : super(key: key);
 
   @override
-  _PlanningWeekBoxState createState() => _PlanningWeekBoxState();
+  _PlanningDayBoxState createState() => _PlanningDayBoxState();
 }
 
-class _PlanningWeekBoxState extends State<_PlanningWeekBox> {
-  late DateTime weekStartDate;
+class _PlanningDayBoxState extends State<_PlanningDayBox> {
+  late DateTime day;
   final List<int> hours = List.generate(11, (index) => 8 + index);
-  final Color tableBorderColor = Colors.green.withOpacity(0.5);
+  final Color tableBorderColor = AppColors.primaryColor.withOpacity(0.5);
   final double borderWidth = 1.0;
 
+  /// Sample appointments list.
   List<Map<String, dynamic>> appointments = [
     {
-      "date": DateTime(2025, 3, 23), 
-      "hour": 9.0, 
-      "client": "Arnaud Dupont", 
+      "date": DateTime(2025, 3, 23),
+      "hour": 9.0,
+      "client": "Arnaud Dupont",
       "animal": "Chien",
       "phone": "06 12 34 56 78",
       "breed": "Labrador",
       "age": "3 Ans",
       "status": "NORMAL",
-      "color": const Color(0xFF2196F3),
+      "color": AppColors.miniAppointmentColor,
       "isCompleted": false,
       "isCancelled": false,
     },
     {
-      "date": DateTime(2025, 3, 24), 
-      "hour": 10.0, 
-      "client": "Felix Martin", 
+      "date": DateTime(2025, 3, 24),
+      "hour": 10.0,
+      "client": "Felix Martin",
       "animal": "Chat",
       "phone": "06 23 45 67 89",
       "breed": "Persan",
       "age": "5 Ans",
       "status": "NORMAL",
-      "color": const Color(0xFF2196F3),
+      "color": AppColors.miniAppointmentColor,
+      "isCompleted": false,
+      "isCancelled": false,
     },
     {
-      "date": DateTime(2025, 3, 26), 
-      "hour": 13.5, 
-      "client": "Pauline Dubois", 
+      "date": DateTime(2025, 3, 26),
+      "hour": 13.5,
+      "client": "Pauline Dubois",
       "animal": "Chien",
       "phone": "06 34 56 78 90",
       "breed": "Bulldog",
       "age": "2 Ans",
       "status": "NORMAL",
-      "color": const Color(0xFF2196F3),
+      "color": AppColors.miniAppointmentColor,
+      "isCompleted": false,
+      "isCancelled": false,
     },
-        {
-      "date": DateTime(2025, 3, 26), 
-      "hour": 18.0, 
-      "client": "auline Dubois", 
+    {
+      "date": DateTime(2025, 3, 26),
+      "hour": 18.0,
+      "client": "Auline Dubois",
       "animal": "Chien",
       "phone": "06 34 56 78 90",
       "breed": "Bulldog",
       "age": "2 Ans",
       "status": "NORMAL",
-      "color": const Color(0xFF2196F3),
+      "color": AppColors.miniAppointmentColor,
+      "isCompleted": false,
+      "isCancelled": false,
     },
     {
-      "date": DateTime(2025, 3, 26), 
-      "hour": 14.5, 
-      "client": "Marie Laurent", 
+      "date": DateTime(2025, 3, 26),
+      "hour": 14.5,
+      "client": "Marie Laurent",
       "animal": "Chat",
       "phone": "06 45 67 89 01",
       "breed": "Maine Coon",
       "age": "1 An",
       "status": "NORMAL",
-      "color": const Color(0xFF2196F3),
+      "color": AppColors.miniAppointmentColor,
+      "isCompleted": false,
+      "isCancelled": false,
+    },
+    // Sample appointments for April 9, 2025:
+    {
+      "date": DateTime(2025, 4, 9),
+      "hour": 9.0,
+      "client": "Alice Durand",
+      "animal": "Chat",
+      "phone": "06 33 44 55 66",
+      "breed": "Siamois",
+      "age": "2 Ans",
+      "status": "NORMAL",
+      "color": AppColors.miniAppointmentColor,
+      "isCompleted": false,
+      "isCancelled": false,
+    },
+    {
+      "date": DateTime(2025, 4, 9),
+      "hour": 11.0,
+      "client": "Bob Martin",
+      "animal": "Chien",
+      "phone": "06 77 88 99 00",
+      "breed": "Beagle",
+      "age": "3 Ans",
+      "status": "NORMAL",
+      "color": AppColors.miniAppointmentColor,
+      "isCompleted": false,
+      "isCancelled": false,
+    },
+    {
+      "date": DateTime(2025, 4, 9),
+      "hour": 15.0,
+      "client": "Claire Lefevre",
+      "animal": "Oiseau",
+      "phone": "06 12 00 34 56",
+      "breed": "Canari",
+      "age": "1 An",
+      "status": "GRAVE",
+      "color": AppColors.miniAppointmentColor,
+      "isCompleted": false,
+      "isCancelled": false,
     },
   ];
 
   @override
   void initState() {
     super.initState();
-    weekStartDate = _getWeekStart(widget.selectedDate);
+    day = widget.selectedDate;
   }
 
   @override
-  void didUpdateWidget(covariant _PlanningWeekBox oldWidget) {
+  void didUpdateWidget(covariant _PlanningDayBox oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate) {
-      weekStartDate = _getWeekStart(widget.selectedDate);
+      setState(() {
+        day = widget.selectedDate;
+      });
     }
   }
 
-  DateTime _getWeekStart(DateTime date) {
-    int dayOfWeek = date.weekday % 7;
-    return date.subtract(Duration(days: dayOfWeek));
-  }
-
-  void _changeWeek(int days) {
+  void _changeDay(int delta) {
     setState(() {
-      weekStartDate = weekStartDate.add(Duration(days: days));
+      day = day.add(Duration(days: delta));
     });
+    widget.onDateChanged(day);
   }
 
   List<Map<String, dynamic>> _getAppointmentsForDay(DateTime day) {
     return appointments.where((appt) {
       return appt["date"].year == day.year &&
-             appt["date"].month == day.month &&
-             appt["date"].day == day.day;
+          appt["date"].month == day.month &&
+          appt["date"].day == day.day;
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isPhone = MediaQuery.of(context).size.width < 600;
-    final double timeColumnWidth = isPhone ? 45.0 : 80.0; // Reduced from 60 to 45 for phones
+    final double timeColumnWidth = isPhone ? 45.0 : 80.0;
     final double hourRowHeight = isPhone ? 50.0 : 60.0;
-    
-    List<String> frenchDayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-    
+
     return Expanded(
       child: Container(
         padding: EdgeInsets.all(isPhone ? 2 : 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 2)],
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 2)
+          ],
         ),
-        child: Padding(
-          padding: EdgeInsets.only(top: isPhone ? 45.0 : 0.0),
-          child: Column(
-            children: [
-              // Week changer with circular buttons
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: tableBorderColor, width: borderWidth),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.green[50],
+        child: Column(
+          children: [
+            // Header
+            Container(
+              height: isPhone ? 40 : 50,
+              decoration: BoxDecoration(
+                border: Border.all(color: tableBorderColor, width: borderWidth),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
                 ),
-                padding: EdgeInsets.symmetric(
-                  vertical: isPhone ? 6 : 8,
-                  horizontal: isPhone ? 8 : 16,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Back button with circular border
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: tableBorderColor, width: borderWidth),
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back, 
-                            color: Colors.green,
-                            size: isPhone ? 20 : 24),
-                        onPressed: () => _changeWeek(-7),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ),
-                    
-                    // Week range text (without year)
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: isPhone ? 8 : 16),
-                      child: Text(
-                        '${DateFormat('d MMM', 'fr_FR').format(weekStartDate)} - '
-                        '${DateFormat('d MMM', 'fr_FR').format(weekStartDate.add(const Duration(days: 6)))}',
-                        style: TextStyle(
-                          fontSize: isPhone ? 14 : 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green[900],
-                        ),
-                      ),
-                    ),
-                    
-                    // Forward button
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: tableBorderColor, width: borderWidth),
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_forward, 
-                            color: Colors.green,
-                            size: isPhone ? 20 : 24),
-                        onPressed: () => _changeWeek(7),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ),
-                  ],
-                ),
+                color: AppColors.primaryLight,
               ),
-              SizedBox(height: isPhone ? 5 : 10),
-
-              // Days header
-              Container(
-                height: isPhone ? 40 : 50,
-                decoration: BoxDecoration(
-                  border: Border.all(color: tableBorderColor, width: borderWidth),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
-                  ),
-                  color: Colors.green[50],
-                ),
-                child: Row(
-                  children: [
-                    // Time column header - now narrower
-                    Container(
-                      width: timeColumnWidth,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Heure',
-                        style: TextStyle(
-                          color: Colors.green[900],
-                          fontWeight: FontWeight.bold,
-                          fontSize: isPhone ? 11 : 14, // Smaller font for phone
-                        ),
+              child: Row(
+                children: [
+                  Container(
+                    width: timeColumnWidth,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Heure',
+                      style: TextStyle(
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isPhone ? 11 : 14,
                       ),
                     ),
-                    
-                    // Empty column separator
-                    Container(
-                      width: borderWidth,
+                  ),
+                  Transform.translate(
+                    offset: Offset(-0.5, 0),
+                    child: Container(
+                      height: double.infinity,
+                      width: 1,
                       color: tableBorderColor,
                     ),
-                    
-                    // Day columns - now have more space
-                    ...List.generate(7, (index) {
-                      DateTime day = weekStartDate.add(Duration(days: index));
-                      return Expanded(
-                        child: Container(
+                  ),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
                           decoration: BoxDecoration(
-                            border: Border(right: BorderSide(
-                              color: tableBorderColor,
-                              width: borderWidth,
-                            )),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.primaryColor),
                           ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '${frenchDayNames[index]}\n${day.day}', // Added line break
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: isPhone ? 12 : 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green[900],
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: AppColors.primaryColor,
+                              size: isPhone ? 16 : 20,
+                            ),
+                            onPressed: () => _changeDay(-1),
+                            padding: EdgeInsets.all(4),
+                            constraints: const BoxConstraints(),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          DateFormat("EEE d MMM", "fr_FR").format(day),
+                          style: TextStyle(
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isPhone ? 12 : 14,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.primaryColor),
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_forward,
+                              color: AppColors.primaryColor,
+                              size: isPhone ? 16 : 20,
+                            ),
+                            onPressed: () => _changeDay(1),
+                            padding: EdgeInsets.all(4),
+                            constraints: const BoxConstraints(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Time grid table
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: tableBorderColor, width: borderWidth),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: Column(
+                    children: hours.map((hour) {
+                      return Container(
+                        height: hourRowHeight,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: hour < 18 ? tableBorderColor : Colors.transparent,
+                              width: borderWidth,
                             ),
                           ),
                         ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-
-              // Time grid table
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: tableBorderColor, width: borderWidth),
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(8),
-                        bottomRight: Radius.circular(8),
-                      ),
-                    ),
-                    child: Column(
-                      children: hours.map((hour) {
-                        return Container(
-                          height: hourRowHeight,
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: hour < 18 ? tableBorderColor : Colors.transparent,
-                                width: borderWidth,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              // Time column - now narrower
-                              Container(
-                                width: timeColumnWidth,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  border: Border(right: BorderSide(
+                        child: Row(
+                          children: [
+                            // Time column
+                            Container(
+                              width: timeColumnWidth,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
                                     color: tableBorderColor,
                                     width: borderWidth,
-                                  )),
-                                  color: Colors.green[50],
-                                ),
-                                child: Text(
-                                  '$hour:00',
-                                  style: TextStyle(
-                                    color: Colors.green[900],
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: isPhone ? 11 : 14, // Smaller font
                                   ),
                                 ),
+                                color: AppColors.primaryLight,
                               ),
-                              
-                              // Empty column separator
-                              Container(
-                                width: borderWidth,
-                                color: tableBorderColor,
+                              child: Text(
+                                '$hour:00',
+                                style: TextStyle(
+                                  color: AppColors.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isPhone ? 11 : 14,
+                                ),
                               ),
-                              
-                              // Day columns - now wider
-                              ...List.generate(7, (dayIndex) {
-                                DateTime day = weekStartDate.add(Duration(days: dayIndex));
-                                var dayAppointments = _getAppointmentsForDay(day);
-                                var cellAppointments = dayAppointments.where((appt) => appt["hour"].floor() == hour).toList();
-                                
-                                return Expanded(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border(right: BorderSide(
-                                        color: tableBorderColor,
-                                        width: borderWidth,
-                                      )),
+                            ),
+                            // Appointment column for the selected day
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      color: tableBorderColor,
+                                      width: borderWidth,
                                     ),
-                                    child: Stack(
-                                      clipBehavior: Clip.none,
-                                      children: cellAppointments.map((appt) {
-                                        return _MiniAppointmentBox(
-                                          clientName: appt["client"],
-                                          animal: appt["animal"],
-                                          hour: appt["hour"],
-                                          color: appt["color"],
-                                          onTap: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AppointmentDetailsModal(
-                                                clientName: appt["client"],
-                                                phone: appt["phone"],
-                                                animal: appt["animal"],
-                                                breed: appt["breed"],
-                                                age: appt["age"],
-                                                status: appt["status"],
-                                                initialColor: appt["color"],
-                                                onColorChanged: (newColor) {
-                                                  setState(() {
-                                                    appt["color"] = newColor;
-                                                    appt["isCompleted"] = newColor == Colors.green;
-                                                    appt["isCancelled"] = newColor == Colors.red;
-                                                  });
-                                                },
-                                                onClose: () => Navigator.pop(context),
-                                                isCompleted: appt["isCompleted"] ?? false,
-                                                isCancelled: appt["isCancelled"] ?? false,
-                                              ),
-                                            );
-                                          },
+                                  ),
+                                ),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: _getAppointmentsForDay(day)
+                                      .where((appt) => appt["hour"].floor() == hour)
+                                      .map((appt) {
+                                    return _MiniAppointmentBox(
+                                      clientName: appt["client"],
+                                      animal: appt["animal"],
+                                      hour: appt["hour"],
+                                      color: appt["color"],
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AppointmentDetailsModal(
+                                            clientName: appt["client"],
+                                            phone: appt["phone"],
+                                            animal: appt["animal"],
+                                            breed: appt["breed"],
+                                            age: appt["age"],
+                                            status: appt["status"],
+                                            initialColor: appt["color"],
+                                            onColorChanged: (newColor) {
+                                              setState(() {
+                                                appt["color"] = newColor;
+                                                if (newColor == AppColors.termineeColor) {
+                                                  appt["isCompleted"] = true;
+                                                  appt["isCancelled"] = false;
+                                                } else if (newColor == AppColors.annuleColor) {
+                                                  appt["isCompleted"] = false;
+                                                  appt["isCancelled"] = true;
+                                                }
+                                              });
+                                            },
+                                            onClose: () => Navigator.pop(context),
+                                            isCompleted: appt["isCompleted"] ?? false,
+                                            isCancelled: appt["isCancelled"] ?? false,
+                                          ),
                                         );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

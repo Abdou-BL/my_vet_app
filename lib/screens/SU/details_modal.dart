@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../widgets/colors.dart';
+
 
 class AppointmentDetailsModal extends StatefulWidget {
   final String clientName;
@@ -29,42 +31,47 @@ class AppointmentDetailsModal extends StatefulWidget {
   });
 
   @override
-  State<AppointmentDetailsModal> createState() => _AppointmentDetailsModalState();
+  State<AppointmentDetailsModal> createState() =>
+      _AppointmentDetailsModalState();
 }
 
-class _AppointmentDetailsModalState extends State<AppointmentDetailsModal> 
+class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late bool _actionTaken;
   late String _actionMessage;
+  bool _isCloseHovered = false;
 
   @override
   void initState() {
     super.initState();
+    // Read persistent appointment state so that when reopening,
+    // the action message remains and the buttons are not shown.
     _actionTaken = widget.isCompleted || widget.isCancelled;
-    _actionMessage = widget.isCompleted ? 'Terminé' : widget.isCancelled ? 'Annulé' : '';
-    
+    _actionMessage =
+        widget.isCompleted ? 'Terminé' : widget.isCancelled ? 'Annulé' : '';
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    
+
     _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeOutBack,
       ),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeIn,
       ),
     );
-    
+
     _controller.forward();
   }
 
@@ -76,13 +83,16 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
 
   @override
   Widget build(BuildContext context) {
-    // Determine if it's a phone screen based on width
+    // Determine screen dimensions for responsive design.
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isPhoneScreen = screenWidth < 600;
-    // Adjust dimensions for phone screens
-    final double containerWidth = isPhoneScreen ? screenWidth * 0.95 : screenWidth * 0.9;
-    final BoxConstraints containerConstraints = isPhoneScreen ? const BoxConstraints() : const BoxConstraints(maxWidth: 500);
-    final EdgeInsets containerPadding = isPhoneScreen ? const EdgeInsets.all(15) : const EdgeInsets.all(25);
+    final double containerWidth =
+        isPhoneScreen ? screenWidth * 0.95 : screenWidth * 0.9;
+    final BoxConstraints containerConstraints = isPhoneScreen
+        ? const BoxConstraints()
+        : const BoxConstraints(maxWidth: 500);
+    final EdgeInsets containerPadding =
+        isPhoneScreen ? const EdgeInsets.all(15) : const EdgeInsets.all(25);
 
     return Center(
       child: ScaleTransition(
@@ -113,7 +123,7 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title with full-width underline
+                      // Modal title and underline
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -122,14 +132,14 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color: AppColors.primaryColor,
                             ),
                           ),
-                          const SizedBox(height: 12), // Space between text and line
+                          const SizedBox(height: 12),
                           Container(
-                            height: 2, // Line thickness
-                            color: Colors.green, // Line color
-                            margin: const EdgeInsets.only(bottom: 15), // Space below the line
+                            height: 2,
+                            color: AppColors.primaryColor,
+                            margin: const EdgeInsets.only(bottom: 15),
                           ),
                         ],
                       ),
@@ -142,6 +152,7 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
                         );
                       }),
                       const SizedBox(height: 25),
+                      // Show either the action message or the buttons.
                       if (_actionTaken)
                         _buildActionStatusMessage()
                       else
@@ -152,29 +163,58 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
                               _actionTaken = true;
                               _actionMessage = 'Terminé';
                             });
-                            widget.onColorChanged(Colors.green);
+                            widget.onColorChanged(AppColors.termineeColor);
                           },
                           onCancel: () {
                             setState(() {
                               _actionTaken = true;
                               _actionMessage = 'Annulé';
                             });
-                            widget.onColorChanged(Colors.red);
+                            widget.onColorChanged(AppColors.annuleColor);
                           },
                         ),
                     ],
                   ),
-                  // Adjusted close button position: a little more top/right outside the container
+                  // Close button in the top right corner.
+                  // For PC screens, a larger hit area with hover animation is provided.
                   Positioned(
                     top: -10,
                     right: -10,
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      padding: EdgeInsets.zero, // Remove default padding
-                      constraints: const BoxConstraints(), // Remove default constraints
-                      onPressed: widget.onClose,
-                      splashRadius: 20,
-                    ),
+                    child: isPhoneScreen
+                        ? IconButton(
+                            icon: const Icon(Icons.close),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: widget.onClose,
+                            splashRadius: 20,
+                          )
+                        : MouseRegion(
+                            onEnter: (_) {
+                              setState(() {
+                                _isCloseHovered = true;
+                              });
+                            },
+                            onExit: (_) {
+                              setState(() {
+                                _isCloseHovered = false;
+                              });
+                            },
+                            child: GestureDetector(
+                              onTap: widget.onClose,
+                              behavior: HitTestBehavior.translucent,
+                              child: AnimatedScale(
+                                scale: _isCloseHovered ? 1.2 : 1.0,
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeInOut,
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  width: 40,
+                                  height: 40,
+                                  child: const Icon(Icons.close),
+                                ),
+                              ),
+                            ),
+                          ),
                   ),
                 ],
               ),
@@ -186,19 +226,18 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
   }
 
   Widget _buildActionStatusMessage() {
+    final bool isComplete = _actionMessage == 'Terminé';
+    final Color displayColor = isComplete ?  AppColors.termineeColor : AppColors.annuleColor;
+
     return Container(
       height: 48,
       width: double.infinity,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: _actionMessage == 'Terminé' 
-            ? Colors.green.withOpacity(0.1) 
-            : Colors.red.withOpacity(0.1),
+        color: displayColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: _actionMessage == 'Terminé' 
-              ? Colors.green 
-              : Colors.red,
+          color: displayColor,
           width: 1.5,
         ),
       ),
@@ -207,9 +246,7 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: _actionMessage == 'Terminé' 
-              ? Colors.green[800] 
-              : Colors.red[800],
+          color: displayColor,
         ),
       ),
     );
@@ -217,34 +254,48 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
 
   String _getLabelForIndex(int index) {
     switch (index) {
-      case 0: return 'Client';
-      case 1: return 'Téléphone';
-      case 2: return 'Animal';
-      case 3: return 'Race';
-      case 4: return 'Âge';
-      case 5: return 'État';
-      default: return '';
+      case 0:
+        return 'Client';
+      case 1:
+        return 'Téléphone';
+      case 2:
+        return 'Animal';
+      case 3:
+        return 'Race';
+      case 4:
+        return 'Âge';
+      case 5:
+        return 'État';
+      default:
+        return '';
     }
   }
 
   String? _getValueForIndex(int index) {
     switch (index) {
-      case 0: return widget.clientName;
-      case 1: return widget.phone;
-      case 2: return '${widget.animal} (Female)';
-      case 3: return widget.breed;
-      case 4: return widget.age;
-      default: return null;
+      case 0:
+        return widget.clientName;
+      case 1:
+        return widget.phone;
+      case 2:
+        return '${widget.animal} (Female)';
+      case 3:
+        return widget.breed;
+      case 4:
+        return widget.age;
+      default:
+        return null;
     }
   }
 
   Widget _buildStatusWidget() {
+    final bool isNormal = widget.status.toLowerCase() == 'normal';
+    final Color statusColor = isNormal ?  AppColors.termineeColor :AppColors.annuleColor;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
       decoration: BoxDecoration(
-        color: widget.status.toLowerCase() == 'normal'
-            ? Colors.green
-            : Colors.red,
+        color: statusColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -258,7 +309,6 @@ class _AppointmentDetailsModalState extends State<AppointmentDetailsModal>
     );
   }
 }
-
 
 class AnimatedDetailRow extends StatefulWidget {
   final String label;
@@ -278,7 +328,7 @@ class AnimatedDetailRow extends StatefulWidget {
   State<AnimatedDetailRow> createState() => _AnimatedDetailRowState();
 }
 
-class _AnimatedDetailRowState extends State<AnimatedDetailRow> 
+class _AnimatedDetailRowState extends State<AnimatedDetailRow>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
@@ -291,7 +341,7 @@ class _AnimatedDetailRowState extends State<AnimatedDetailRow>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(-0.5, 0.0),
       end: Offset.zero,
@@ -301,14 +351,14 @@ class _AnimatedDetailRowState extends State<AnimatedDetailRow>
         curve: Curves.easeOut,
       ),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeIn,
       ),
     );
-    
+
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.forward();
     });
@@ -337,16 +387,17 @@ class _AnimatedDetailRowState extends State<AnimatedDetailRow>
                   widget.label,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: AppColors.primaryColor,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: widget.child ?? Text(
-                  widget.value!,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+                child: widget.child ??
+                    Text(
+                      widget.value!,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
               ),
             ],
           ),
@@ -372,7 +423,7 @@ class AnimatedButtonRow extends StatefulWidget {
   State<AnimatedButtonRow> createState() => _AnimatedButtonRowState();
 }
 
-class _AnimatedButtonRowState extends State<AnimatedButtonRow> 
+class _AnimatedButtonRowState extends State<AnimatedButtonRow>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -385,21 +436,21 @@ class _AnimatedButtonRowState extends State<AnimatedButtonRow>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    
+
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.elasticOut,
       ),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeIn,
       ),
     );
-    
+
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.forward();
     });
@@ -421,16 +472,16 @@ class _AnimatedButtonRowState extends State<AnimatedButtonRow>
         opacity: _fadeAnimation,
         child: Row(
           children: [
-            // "Terminer/Marquer comme terminé" button
+            // "Terminer" button
             Expanded(
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColors.termineeColor,
                     padding: EdgeInsets.symmetric(vertical: verticalPadding),
                     elevation: 0,
-                    shadowColor: Colors.green.withOpacity(0.5),
+                    shadowColor: AppColors.termineeColor.withOpacity(0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -445,9 +496,9 @@ class _AnimatedButtonRowState extends State<AnimatedButtonRow>
                     ),
                   ),
                   onPressed: widget.onMarkComplete,
-                  child: Text(
-                    isPhoneScreen ? 'Teminer' : 'Marquer comme terminé',
-                    style: const TextStyle(
+                  child: const Text(
+                    'Terminer',
+                    style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
@@ -463,10 +514,10 @@ class _AnimatedButtonRowState extends State<AnimatedButtonRow>
                 cursor: SystemMouseCursors.click,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE53935),
+                    backgroundColor:  AppColors.annuleColor,
                     padding: EdgeInsets.symmetric(vertical: verticalPadding),
                     elevation: 0,
-                    shadowColor: Colors.red.withOpacity(0.5),
+                    shadowColor: AppColors.annuleColor.withOpacity(0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),

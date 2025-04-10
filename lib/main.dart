@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart'; // ✅ استيراد مكتبة تهيئة التاريخ
-import 'screens/doctor_home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 void main() async {
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Stack(
         children: const [
-          DoctorHomeScreen(),
+          SplashScreen(),
           AIScreenPreloader(),
         ],
       ),
@@ -61,7 +61,7 @@ class _AIScreenPreloaderState extends State<AIScreenPreloader> {
             ),
           ),
           initialUrlRequest: URLRequest(
-            url: WebUri('https://test-ai-1--vetvet.on.websim.ai'),
+            url: WebUri('vet-on-call-ai.on.websim.ai'),
           ),
           onWebViewCreated: (_) {
             // No need to store the controller, so we ignore it.

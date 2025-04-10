@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'signup_type_screen.dart'; // ✅ استيراد شاشة اختيار نوع التسجيل
-import '../widgets/animated_widgets.dart'; // ✅ استيراد الويدجت المتحركة
-import 'doctor_home_screen.dart'; // ✅ استيراد شاشة المستخدم الرئيسية
+import 'signup_type_screen.dart';
+import '../widgets/animated_widgets.dart';
+import 'doctor_home_screen.dart';
+import '../widgets/colors.dart'; // ✅ Import custom colors
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,16 +27,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double containerWidth = screenWidth * 0.4; // ✅ جعل العرض 40% من الشاشة
-    containerWidth = containerWidth.clamp(320.0, 500.0); // ✅ الحد الأدنى 320px والحد الأقصى 500px
+    double containerWidth = screenWidth * 0.4;
+    containerWidth = containerWidth.clamp(320.0, 500.0);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFDBFFE6), // ✅ خلفية مناسبة للتطبيق
+      backgroundColor: AppColors.primaryLight, // ✅ Using custom color
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Container(
-            width: containerWidth, // ✅ تعديل العرض ليكون ديناميكيًا
+            width: containerWidth,
             padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -57,8 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text(
                     'Login',
                     style: TextStyle(
-                      color: Color(0xFF2E7D32),
-                      fontSize: 26, // ✅ تكبير العنوان قليلاً
+                      color: AppColors.primaryColor, // ✅ Using custom color
+                      fontSize: 26,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -75,14 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
-                    width: double.infinity, // ✅ جعل الزر يمتد للعرض بالكامل
+                    width: double.infinity,
                     child: AnimatedButton(
                       text: 'Login',
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           print('Login successful for: ${_emailController.text}');
-
-                          // ✅ الانتقال إلى شاشة المستخدم الرئيسية
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -97,12 +96,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   RichText(
                     text: TextSpan(
                       text: "Don't have an account? ",
-                      style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black54),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black54,
+                      ),
                       children: [
                         TextSpan(
                           text: 'Sign up',
                           style: const TextStyle(
-                            color: Color(0xFF2E7D32),
+                            color: AppColors.primaryColor, // ✅ Using custom color
                             fontSize: 16,
                             fontWeight: FontWeight.w900,
                           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'colors.dart';
 class NavItem {
   final String icon;
   final String label;
@@ -18,7 +18,7 @@ class CustomNavBar extends StatelessWidget {
   final double labelFontSize;
 
   const CustomNavBar({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.items,
     required this.onItemTapped,
@@ -26,7 +26,7 @@ class CustomNavBar extends StatelessWidget {
     this.navBarHeight = 60,
     this.iconSize = 22,
     this.labelFontSize = 11,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class CustomNavBar extends StatelessWidget {
         height: effectiveNavBarHeight,
         width: navBarWidth,
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 14, 194, 35),
+          color: AppColors.customColor1,
           borderRadius: BorderRadius.circular(25), // refined radius
           boxShadow: [
             BoxShadow(
@@ -104,7 +104,7 @@ class CustomNavBar extends StatelessWidget {
                             height: effectiveIconSize,
                             colorFilter: ColorFilter.mode(
                               selectedIndex == index
-                                  ? const Color.fromARGB(255, 13, 173, 40)
+                                  ? AppColors.primaryColor
                                   : Colors.white.withOpacity(0.8),
                               BlendMode.srcIn,
                             ),
@@ -122,7 +122,7 @@ class CustomNavBar extends StatelessWidget {
                                 items[index].label,
                                 style: TextStyle(
                                   color: selectedIndex == index
-                                      ? const Color.fromARGB(255, 13, 173, 40)
+                                      ? AppColors.primaryColor
                                       : Colors.white.withOpacity(0.8),
                                   fontSize: effectiveLabelFontSize,
                                   fontWeight: FontWeight.w500,

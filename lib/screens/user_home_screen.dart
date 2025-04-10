@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:async';
+import '../widgets/nav_bar.dart';
 
-// استيراد الشاشات
+// Import your screens
 import 'SU/home_screen.dart';
 import 'SU/ai_screen.dart';
 import 'SU/map_screen.dart';
@@ -15,13 +15,14 @@ class UserHomeScreen extends StatefulWidget {
   _UserHomeScreenState createState() => _UserHomeScreenState();
 }
 
-class _UserHomeScreenState extends State<UserHomeScreen> {
+class _UserHomeScreenState extends State<UserHomeScreen>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
-  bool _isBarVisible = true;
-  Timer? _hideTimer;
+  bool _isTransitioning = false;
+  late PageController _pageController;
 
   final List<Widget> _screens = [
-    AnnouncementScreen(),
+    AnnouncementScreen(isDoctor: false), // تمرير false للمستخدم العادي
     AIScreen(),
     MapScreen(),
     UserScreen(),
@@ -37,180 +38,115 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   void initState() {
     super.initState();
-    _isBarVisible = true;
-    Future.delayed(Duration(seconds: 5), () => _startHideTimer());
+    _pageController = PageController(
+      initialPage: _selectedIndex,
+      viewportFraction: 1.0,
+      keepPage: true,
+    );
+    _precacheIcons();
+    _precachePages();
+  }
+
+  // Precache SVG icons for smoother loading.
+  void _precacheIcons() async {
+    for (var item in _items) {
+      final loader = SvgAssetLoader(item.icon);
+      await svg.cache.putIfAbsent(
+        loader.cacheKey(null),
+        () => loader.loadBytes(null),
+      );
+    }
+  }
+
+  void _precachePages() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (var i = 0; i < _screens.length; i++) {
+        _pageController.position.correctPixels(i.toDouble());
+      }
+      _pageController.position.correctPixels(_selectedIndex.toDouble());
+    });
   }
 
   void _onItemTapped(int index) {
+    if (_isTransitioning || _selectedIndex == index) return;
+
     setState(() {
+      _isTransitioning = true;
       _selectedIndex = index;
-      _resetHideTimer();
     });
-  }
 
-  void _startHideTimer() {
-    _hideTimer?.cancel();
-    _hideTimer = Timer(Duration(seconds: 3), () {
-      setState(() {
-        _isBarVisible = false;
-      });
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutQuart,
+    ).then((_) {
+      if (mounted) {
+        setState(() => _isTransitioning = false);
+      }
     });
-  }
-
-  void _resetHideTimer() {
-    setState(() {
-      _isBarVisible = true;
-    });
-    _startHideTimer();
   }
 
   @override
   void dispose() {
-    _hideTimer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    double navBarWidth = MediaQuery.of(context).size.width * 0.8;
-    double itemWidth = navBarWidth / _items.length;
+    final double navBarWidth = MediaQuery.of(context).size.width;
+    final double navBarHeight = 70;
+    final bool isPhone = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: GestureDetector(
-        onVerticalDragUpdate: (details) {
-          if (details.primaryDelta! < -10) {
-            setState(() {
-              _isBarVisible = true;
-            });
-            _resetHideTimer();
-          }
-        },
-        child: Stack(
-          children: [
-            _screens[_selectedIndex],
-
-            // شريط التنقل الجديد
-            Positioned(
-              bottom: 25,
-              left: (MediaQuery.of(context).size.width - navBarWidth) / 2,
-              child: MouseRegion(
-                onEnter: (event) {
-                  setState(() {
-                    _isBarVisible = true;
-                  });
-                  _resetHideTimer();
-                },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 500),
-                  height: 70,
-                  transform: Matrix4.translationValues(0, _isBarVisible ? 0 : 100, 0),
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 14, 194, 35),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      // الخلفية المتحركة للعناصر
-                      AnimatedPositioned(
-                        duration: Duration(milliseconds: 800),
-                        curve: Curves.elasticOut,
-                        left: (_selectedIndex * itemWidth) + 10,
-                        child: Container(
-                          width: itemWidth - 20,
-                          height: 45,
-                          margin: EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 6,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // الأيقونات مع زيادة مساحة النقر
-                      Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: List.generate(_items.length, (index) {
-                            return InkWell(
-                              onTap: () => _onItemTapped(index),
-                              borderRadius: BorderRadius.circular(20),
-                              splashColor: Colors.white.withOpacity(0.2),
-                              child: SizedBox(
-                                width: itemWidth,
-                                height: 70, // تكبير مساحة النقر
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      _items[index].icon,
-                                      width: 22,
-                                      height: 22,
-                                      colorFilter: ColorFilter.mode(
-                                        _selectedIndex == index
-                                            ? Color.fromARGB(255, 13, 173, 40)
-                                            : Colors.white.withOpacity(0.8),
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    AnimatedOpacity(
-                                      duration: Duration(milliseconds: 400),
-                                      opacity: _selectedIndex == index ? 1.0 : 0.0,
-                                      child: AnimatedSlide(
-                                        duration: Duration(milliseconds: 400),
-                                        offset: _selectedIndex == index
-                                            ? Offset.zero
-                                            : Offset(1, 0),
-                                        child: Text(
-                                          _items[index].label,
-                                          style: TextStyle(
-                                            color: _selectedIndex == index
-                                             ? Color.fromARGB(255, 13, 173, 40)
-                                             : Colors.white.withOpacity(0.8),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: isPhone ? navBarHeight - 15 : navBarHeight,
             ),
-          ],
-        ),
+            child: PageView(
+              controller: _pageController,
+              physics: const ClampingScrollPhysics(),
+              onPageChanged: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              children: _screens.map((screen) {
+                return KeepAliveWrapper(child: screen);
+              }).toList(),
+            ),
+          ),
+          CustomNavBar(
+            selectedIndex: _selectedIndex,
+            items: _items,
+            onItemTapped: _onItemTapped,
+            navBarWidth: navBarWidth,
+            navBarHeight: navBarHeight,
+          ),
+        ],
       ),
     );
   }
 }
 
-class NavItem {
-  final String icon;
-  final String label;
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
 
-  NavItem({required this.icon, required this.label});
+  const KeepAliveWrapper({super.key, required this.child});
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

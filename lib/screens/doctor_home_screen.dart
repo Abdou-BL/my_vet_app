@@ -4,8 +4,10 @@ import '../widgets/nav_bar.dart';
 
 // استيراد الشاشات
 import 'SU/home_screen.dart';
+import 'SU/ai_screen.dart';
 import 'SU/rdv_screen.dart';
 import 'SU/user_screen.dart';
+ 
 
 class DoctorHomeScreen extends StatefulWidget {
   const DoctorHomeScreen({super.key});
@@ -21,7 +23,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen>
   late PageController _pageController;
 
   final List<Widget> _screens = [
-    const AnnouncementScreen(),
+    AnnouncementScreen(isDoctor: true), // تمرير true للطبيب
+    AIScreen(),
     RDVScreen(),
     UserScreen(),
   ];
@@ -96,12 +99,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen>
     final bool isPhone = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Padding(
             padding: EdgeInsets.only(
-              bottom: isPhone ? navBarHeight -15 : navBarHeight,
+              bottom: isPhone ? navBarHeight - 15 : navBarHeight,
             ),
             child: PageView(
               controller: _pageController,
@@ -110,9 +113,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen>
                 setState(() => _selectedIndex = index);
               },
               children: _screens.map((screen) {
-                return KeepAliveWrapper(
-                  child: screen,
-                );
+                return KeepAliveWrapper(child: screen);
               }).toList(),
             ),
           ),
@@ -132,7 +133,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen>
 class KeepAliveWrapper extends StatefulWidget {
   final Widget child;
 
-  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+  const KeepAliveWrapper({super.key, required this.child});
 
   @override
   State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
